@@ -8,9 +8,10 @@ package com.terrence.tireestimator.ui
     import androidx.compose.ui.Modifier
     import androidx.compose.ui.unit.dp
     import com.terrence.tireestimator.viewmodel.TireViewModel
-    import androidx.compose.material3.TextField
+   // import androidx.compose.material3.TextField
     import androidx.compose.foundation.text.KeyboardOptions
     import androidx.compose.ui.text.input.KeyboardType
+    import androidx.compose.ui.Alignment
     import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -26,6 +27,20 @@ package com.terrence.tireestimator.ui
             PriceInput(viewModel)
             QuantityInput(viewModel)
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Include TPMS Packs", style = MaterialTheme.typography.bodyMedium)
+                Switch(
+                    checked = viewModel.updateIncludeTpms,
+                    onCheckedChange = { viewModel.setIncludeTpms(it) }
+                )
+            }
+
             Spacer(Modifier.height(24.dp))
             Divider()
 
@@ -33,7 +48,7 @@ package com.terrence.tireestimator.ui
             Text("Cost Breakdown", style = MaterialTheme.typography.titleMedium)
             BreakdownRow("Tire Cost", viewModel.tireCost)
             BreakdownRow("Disposal Fee", viewModel.disposalFee)
-            BreakdownRow("TPMS Packs", viewModel.tpmsPacks)
+            BreakdownRow("TPMS Packs", viewModel.tpmsFeeTotal, )
             BreakdownRow("Tax", viewModel.tax)
             BreakdownRow("State Fee", viewModel.stateFeeTotal)
             BreakdownRow("Subtotal", viewModel.subtotal)
@@ -83,6 +98,8 @@ fun TireEstimatorScreenPreview() {
     val mockViewModel = TireViewModel().apply {
         pricePerTire = 274.99
         quantity = 4
+        setIncludeTpms(true)
+
     }
 
     TireEstimatorScreen(viewModel = mockViewModel)

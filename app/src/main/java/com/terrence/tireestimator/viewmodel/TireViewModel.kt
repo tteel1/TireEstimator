@@ -5,14 +5,31 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 
+enum class TirePromotion(val discountAmount: Double) {
+    NONE(0.0),
+    OFF_60(60.0),
+    OFF_80(80.0)
+}
+
 class TireViewModel : ViewModel() {
 
-    var updateIncludeTpms by mutableStateOf(true)
+
+
+    var selectedPromotion by mutableStateOf(TirePromotion.NONE)
         private set
 
-    fun setIncludeTpms(value: Boolean) {
-        updateIncludeTpms = value
+    fun setPromotion(promo: TirePromotion) {
+        selectedPromotion = promo
     }
+
+
+
+    fun updateIncludeTpms(value: Boolean) {
+        includeTpms = value
+    }
+
+    var includeTpms by mutableStateOf(true)
+        private set
 
     var pricePerTire by mutableStateOf(0.0)
     var quantity by mutableStateOf(4)
@@ -24,10 +41,13 @@ class TireViewModel : ViewModel() {
 
     val tireCost: Double get() = pricePerTire * quantity
     val stateFeeTotal: Double get() = stateFee * quantity
-    val tpmsFeeTotal: Double get() = if (updateIncludeTpms) tpmsFeePerTire * quantity else 0.0
+    val tpmsFeeTotal: Double get() = if (includeTpms) tpmsFeePerTire * quantity else 0.0
     val disposalFee: Double get() = disposalFeePerTire * quantity
-    val taxableTotal: Double get() = tireCost + tpmsFeeTotal + disposalFee
+    val taxableTotal: Double get() = tireCost + tpmsFeeTotal + disposalFee - promotionDiscount
     val tax: Double get() = taxableTotal * taxRate
+    val promotionDiscount: Double
+        get() = if (quantity >= 4) selectedPromotion.discountAmount else 0.0
+
     val subtotal: Double get() = tireCost + tpmsFeeTotal + disposalFee + stateFeeTotal
     val totalCost: Double get() = taxableTotal + tax + stateFeeTotal
 

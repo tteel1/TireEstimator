@@ -13,6 +13,7 @@ package com.terrence.tireestimator.ui
     import androidx.compose.ui.text.input.KeyboardType
     import androidx.compose.ui.Alignment
     import androidx.compose.ui.tooling.preview.Preview
+    import com.terrence.tireestimator.viewmodel.TirePromotion
 
 @Composable
     fun TireEstimatorScreen(viewModel: TireViewModel) {
@@ -26,6 +27,8 @@ package com.terrence.tireestimator.ui
             // Inputs
             PriceInput(viewModel)
             QuantityInput(viewModel)
+            PromotionSelector(viewModel)
+
 
             Row(
                 modifier = Modifier
@@ -36,8 +39,8 @@ package com.terrence.tireestimator.ui
             ) {
                 Text("Include TPMS Packs", style = MaterialTheme.typography.bodyMedium)
                 Switch(
-                    checked = viewModel.updateIncludeTpms,
-                    onCheckedChange = { viewModel.setIncludeTpms(it) }
+                    checked = viewModel.includeTpms,
+                    onCheckedChange = { viewModel.updateIncludeTpms(it) }
                 )
             }
 
@@ -48,7 +51,8 @@ package com.terrence.tireestimator.ui
             Text("Cost Breakdown", style = MaterialTheme.typography.titleMedium)
             BreakdownRow("Tire Cost", viewModel.tireCost)
             BreakdownRow("Disposal Fee", viewModel.disposalFee)
-            BreakdownRow("TPMS Packs", viewModel.tpmsFeeTotal, )
+            BreakdownRow("TPMS Packs", viewModel.tpmsFeeTotal )
+            BreakdownRow("Promotion Discount", -viewModel.promotionDiscount)
             BreakdownRow("Tax", viewModel.tax)
             BreakdownRow("State Fee", viewModel.stateFeeTotal)
             BreakdownRow("Subtotal", viewModel.subtotal)
@@ -88,6 +92,29 @@ fun BreakdownRow(label: String, amount: Double, bold: Boolean = false) {
     ) {
         Text(label, style = style)
         Text("$${"%.2f".format(amount)}", style = style)
+
+    }
+}
+
+@Composable
+fun PromotionSelector(viewModel: TireViewModel) {
+    Column {
+        Text("Promotion", style = MaterialTheme.typography.bodyMedium)
+        Row {
+            TirePromotion.values().forEach { promo ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = viewModel.selectedPromotion == promo,
+                        onClick = { viewModel.setPromotion(promo) }
+                    )
+                    Text(text = when (promo) {
+                        TirePromotion.NONE -> "No Promo"
+                        TirePromotion.OFF_60 -> "$60 Off"
+                        TirePromotion.OFF_80 -> "$80 Off"
+                    })
+                }
+            }
+        }
     }
 }
 
@@ -98,7 +125,7 @@ fun TireEstimatorScreenPreview() {
     val mockViewModel = TireViewModel().apply {
         pricePerTire = 274.99
         quantity = 4
-        setIncludeTpms(true)
+        updateIncludeTpms(true)
 
     }
 

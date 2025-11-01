@@ -16,7 +16,7 @@ package com.terrence.tireestimator.ui
     import com.terrence.tireestimator.viewmodel.TirePromotion
 
 @Composable
-    fun TireEstimatorScreen(viewModel: TireViewModel) {
+    fun TireEstimatorScreen(viewModel: TireViewModel,modifier: Modifier = Modifier) {
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)) {

@@ -3,6 +3,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import java.math.BigDecimal
+import java.math.RoundingMode
+
 
 
 enum class TirePromotion(val discountAmount: Double) {
@@ -35,7 +38,7 @@ class TireViewModel : ViewModel() {
     var quantity by mutableStateOf(4)
 
     private val stateFee = 2.50
-    private val taxRate = 0.08625
+    private val taxRate = 0.0875
     private val tpmsFeePerTire = 2.99
     private val disposalFeePerTire = 2.25
 
@@ -44,7 +47,10 @@ class TireViewModel : ViewModel() {
     val tpmsFeeTotal: Double get() = if (includeTpms) tpmsFeePerTire * quantity else 0.0
     val disposalFee: Double get() = disposalFeePerTire * quantity
     val taxableTotal: Double get() = tireCost + tpmsFeeTotal + disposalFee - promotionDiscount
-    val tax: Double get() = taxableTotal * taxRate
+    val tax: Double get() =  BigDecimal(taxableTotal * taxRate)
+        .setScale(2, RoundingMode.HALF_UP)
+        .toDouble()
+
     val promotionDiscount: Double
         get() = if (quantity >= 4) selectedPromotion.discountAmount else 0.0
 

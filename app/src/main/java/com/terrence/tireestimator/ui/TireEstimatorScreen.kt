@@ -10,6 +10,8 @@ package com.terrence.tireestimator.ui
     import com.terrence.tireestimator.viewmodel.TireViewModel
    // import androidx.compose.material3.TextField
     import androidx.compose.foundation.text.KeyboardOptions
+    import androidx.compose.foundation.verticalScroll
+    import androidx.compose.foundation.rememberScrollState
     import androidx.compose.ui.text.input.KeyboardType
     import androidx.compose.ui.Alignment
     import androidx.compose.ui.tooling.preview.Preview
@@ -19,14 +21,33 @@ package com.terrence.tireestimator.ui
     fun TireEstimatorScreen(viewModel: TireViewModel,modifier: Modifier = Modifier) {
         Column(modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)) {
 
-            Text("Tire Estimator", style = MaterialTheme.typography.headlineSmall)
+            Text("", style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(16.dp))
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Staggered Setup", style = MaterialTheme.typography.bodyMedium)
+                Switch(
+                    checked = viewModel.isStaggered,
+                    onCheckedChange = { viewModel.isStaggered = it }
+                )
+            }
+
             // Inputs
-            PriceInput(viewModel)
-            QuantityInput(viewModel)
+            if (viewModel.isStaggered) {
+                StaggeredInputs(viewModel)
+            } else {
+                PriceInput(viewModel)
+                QuantityInput(viewModel)
+            }
             PromotionSelector(viewModel)
 
 
@@ -61,15 +82,62 @@ package com.terrence.tireestimator.ui
         }
     }
 
+
+
 @Composable
 fun PriceInput(viewModel: TireViewModel) {
+    val formatted = "$" + String.format("%.2f", viewModel.pricePerTire)
     TextField(
-        value = viewModel.pricePerTire.toString(),
-        onValueChange = { viewModel.pricePerTire = it.toDoubleOrNull() ?: 0.0 },
+        value = formatted,
+        onValueChange = { input ->
+            viewModel.squareRawInput = input.filter { it.isDigit() }
+        },
         label = { Text("Price per Tire") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = Modifier.fillMaxWidth()
     )
+}
+@Composable
+fun StaggeredInputs(viewModel: TireViewModel) {
+    if (viewModel.isStaggered) {
+        val frontFormatted = "$" + String.format("%.2f", viewModel.frontPricePerTire)
+        TextField(
+            value = frontFormatted,
+            onValueChange = { input ->
+                viewModel.frontRawInput = input.filter { it.isDigit() }
+            },
+            label = { Text("Front Tire Price") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        TextField(
+            value = viewModel.frontQuantity.toString(),
+            onValueChange = { viewModel.frontQuantity = it.toIntOrNull() ?: 0 },
+            label = { Text("Front Quantity") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        val rearFormatted = "$" + String.format("%.2f", viewModel.rearPricePerTire)
+        TextField(
+            value = rearFormatted,
+            onValueChange = { input ->
+                viewModel.rearRawInput = input.filter { it.isDigit() }
+            },
+            label = { Text("Rear Tire Price") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        TextField(
+            value = viewModel.rearQuantity.toString(),
+            onValueChange = { viewModel.rearQuantity = it.toIntOrNull() ?: 0 },
+            label = { Text("Rear Quantity") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -123,7 +191,7 @@ fun PromotionSelector(viewModel: TireViewModel) {
 fun TireEstimatorScreenPreview() {
     // You can pass a dummy ViewModel or mock data here
     val mockViewModel = TireViewModel().apply {
-        pricePerTire = 274.99
+        squareRawInput = "27499"
         quantity = 4
         updateIncludeTpms(true)
 
